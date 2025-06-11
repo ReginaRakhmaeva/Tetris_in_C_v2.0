@@ -7,37 +7,9 @@
  * начала и окончания игры. Также включает логику завершения игры.
  */
 
-#include "../header/tetris_interface.h"
+#include "../hdr/tetris_interface.h"
 
 #include "../../../brick_game/tetris/header/game_logic.h"
-
-/**
- * @brief Обрабатывает конец игры и обновляет поле.
- *
- * Функция проверяет, может ли текущая фигура двигаться вниз. Если нет, она
- * фиксирует фигуру на поле, очищает поле и отрисовывает статичное поле с
- * информацией о текущем состоянии игры.
- *
- * @param game Указатель на структуру GameInfo_t, содержащую информацию о
- * текущей игре.
- * @param currentPiece Указатель на текущую фигуру игры.
- */
-// void handleGameOver(GameInfo_t *game, Piece *currentPiece) {
-//   if (!canMoveDown(currentPiece, game->field)) {
-//     if (isSpaceAvailableForFullFix(game->field, currentPiece)) {
-//       fixPiece(game->field, currentPiece);
-//     } else {
-//       fixPartialPiece(game->field, currentPiece);
-//     }
-//     clearField();
-//     drawStaticField(game->field);
-//     drawGameInfo(game);
-//     refresh();
-//     napms(500);
-//     game->pause = true;
-//     ungetch('q');
-//   }
-// }
 
 /**
  * @brief Очищает игровое поле.
