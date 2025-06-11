@@ -1,14 +1,12 @@
 #ifndef BRICKGAME_H
 #define BRICKGAME_H
+#include <stdbool.h>
 
 /** @brief Количество строк в игровом поле. */
 #define ROWS 20
 
 /** @brief Количество столбцов в игровом поле. */
 #define COLS 10
-
-/** @brief Код успешного выполнения. */
-#define SUCCESS 0
 
 /**
  * @struct GameInfo_t
