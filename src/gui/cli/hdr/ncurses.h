@@ -8,11 +8,8 @@
 
 #include <locale.h>
 #include <ncurses.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "../../../brick_game/tetris/header/game_logic.h"
-#include "fsm.h"
 #include "tetris_interface.h"
 
 /**

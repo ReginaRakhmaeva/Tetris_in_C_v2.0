@@ -9,12 +9,6 @@
 /** @brief Путь к файлу с рекордным счетом. */
 #define HIGH_SCORE_FILE "brick_game/tetris/highscore.txt"
 
-/** @brief Количество строк в игровом поле. */
-#define ROWS 20
-
-/** @brief Количество столбцов в игровом поле. */
-#define COLS 10
-
 /** @brief Код успешного выполнения. */
 #define SUCCESS 0
 
