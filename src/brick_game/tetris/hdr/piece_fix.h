@@ -7,6 +7,7 @@
 #define PIECE_FIX_H
 
 #include "game_logic.h"
+#include "objects.h"
 
 /**
  * @brief Фиксирует фигуру на игровом поле.

@@ -6,7 +6,7 @@
 #define ROWS 20
 
 /** @brief Количество столбцов в игровом поле. */
-#define COLS 10
+#define COLUMNS 10
 
 /**
  * @struct GameInfo_t

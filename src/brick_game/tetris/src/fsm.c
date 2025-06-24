@@ -1,49 +1,24 @@
-#include "fsm.h"
+#include "../hdr/fsm.h"
 
 #include <stddef.h>
 #include <time.h>
 
-#include "../../common_base/brick_game.h"
-#include "../hdr/game_logic.h"
-#include "../hdr/piece_create.h"
-#include "../hdr/piece_fix.h"
-#include "../hdr/piece_move.h"
-typedef enum {
-  kStateIdle,
-  kStatePlaying,
-  kStatePaused,
-  kStateOver,
-  kStateTerminated
-} FSMState;
-
-typedef struct {
-  FSMState current_state;
-  GameInfo_t game_info;
-  Piece *current_piece;
-  clock_t last_tick;
-} FSMContext;
-
-typedef struct {
-  FSMState current;
-  UserAction_t input;
-  FSMState next;
-  void (*handler)(FSMContext *ctx, bool hold);
-} Transition;
-
 static FSMContext fsm_ctx = {kStateIdle, {0}, NULL, 0};
 
-/* --- Обработчики --- */
 static void HandleStart(FSMContext *ctx, bool hold) {
+  (void)hold;
   initializeGame(&ctx->game_info);
   spawnNewPiece(&ctx->current_piece);
   ctx->last_tick = clock();
 }
 
 static void HandlePause(FSMContext *ctx, bool hold) {
+  (void)hold;
   ctx->game_info.pause = !ctx->game_info.pause;
 }
 
 static void HandleTerminate(FSMContext *ctx, bool hold) {
+  (void)hold;
   saveHighScore(ctx->game_info.high_score);
   if (ctx->current_piece != NULL) {
     free(ctx->current_piece);
@@ -52,18 +27,21 @@ static void HandleTerminate(FSMContext *ctx, bool hold) {
 }
 
 static void HandleLeft(FSMContext *ctx, bool hold) {
+  (void)hold;
   if (canMoveLeft(ctx->current_piece, ctx->game_info.field)) {
     ctx->current_piece->x--;
   }
 }
 
 static void HandleRight(FSMContext *ctx, bool hold) {
+  (void)hold;
   if (canMoveRight(ctx->current_piece, ctx->game_info.field)) {
     ctx->current_piece->x++;
   }
 }
 
 static void HandleDown(FSMContext *ctx, bool hold) {
+  (void)hold;
   if (!updatePiecePosition(ctx->current_piece, &ctx->game_info,
                            &ctx->last_tick)) {
     fixPiece(ctx->game_info.field, ctx->current_piece);
@@ -75,6 +53,7 @@ static void HandleDown(FSMContext *ctx, bool hold) {
 }
 
 static void HandleAction(FSMContext *ctx, bool hold) {
+  (void)hold;
   rotatePiece(ctx->current_piece, ctx->game_info.field);
 }
 
@@ -109,4 +88,34 @@ void userInput(UserAction_t action, bool hold) {
 GameInfo_t updateCurrentState() {
   fsm_ctx.game_info = updateGameLogic(fsm_ctx.current_state);
   return fsm_ctx.game_info;
+}
+
+GameInfo_t updateGameLogic(FSMState state) {
+  GameInfo_t game;
+  initializeGame(&game);
+
+  switch (state) {
+    case kStateIdle:
+      // Ожидание старта — пустая инициализация
+      break;
+
+    case kStatePlaying:
+      // Запуск игры или продолжение
+      game.pause = 0;
+      break;
+
+    case kStatePaused:
+      game.pause = 1;
+      break;
+
+    case kStateOver:
+      // Здесь можно добавить анимацию или экран проигрыша
+      break;
+
+    case kStateTerminated:
+      // Сброс или очистка
+      break;
+  }
+
+  return game;
 }

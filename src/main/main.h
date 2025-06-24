@@ -16,7 +16,10 @@
 #endif
 
 #include <locale.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "../brick_game/tetris/hdr/fsm.h"
 
 #endif  // MAIN_H

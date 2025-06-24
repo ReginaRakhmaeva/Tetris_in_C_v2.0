@@ -9,7 +9,7 @@
 #include <locale.h>
 #include <ncurses.h>
 
-#include "../../../brick_game/tetris/header/game_logic.h"
+#include "../../../brick_game/tetris/hdr/game_logic.h"
 #include "tetris_interface.h"
 
 /**
@@ -28,5 +28,5 @@ void cleanupNcurses(GameInfo_t *game);
  * @brief Очищает ncurses перед выходом из стартового экрана.
  */
 void cleanupNcursesstart();
-
+void showGameOverScreen(GameInfo_t *game);
 #endif  // NCURSES_H

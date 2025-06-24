@@ -6,7 +6,7 @@
  * проверки возможности полной фиксации и обработки частичной фиксации.
  */
 
-#include "../header/piece_fix.h"
+#include "../hdr/piece_fix.h"
 
 /**
  * @brief Фиксирует фигуру на игровом поле.
@@ -41,7 +41,7 @@ void fixPartialPiece(int **field, Piece *piece) {
       if (piece->shape[i][j]) {
         hasBlock = true;
         int newX = piece->x + j;
-        if (newX >= 0 && newX < COLS) {
+        if (newX >= 0 && newX < COLUMNS) {
           field[0][newX] = 1;
         }
       }

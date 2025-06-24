@@ -6,7 +6,7 @@
  * вправо и вниз, а также для их вращения и проверки корректности вращения.
  */
 
-#include "../header/piece_move.h"
+#include "../hdr/piece_move.h"
 
 /**
  * @brief Проверяет, может ли фигура двигаться влево.
@@ -49,7 +49,8 @@ bool canMoveRight(Piece *piece, int **field) {
   for (int i = 0; i < 4 && canMove; i++) {
     for (int j = 0; j < 4 && canMove; j++) {
       if (piece->shape[i][j]) {
-        if (piece->x + j + 1 >= COLS || field[piece->y + i][piece->x + j + 1]) {
+        if (piece->x + j + 1 >= COLUMNS ||
+            field[piece->y + i][piece->x + j + 1]) {
           canMove = false;
         }
       }
@@ -161,7 +162,7 @@ bool isRotationValid(Piece *piece, int rotated[4][4], int offsetX, int offsetY,
         int newX = piece->x + j + offsetX;
         int newY = piece->y + i + offsetY;
 
-        if (newX < 0 || newX >= COLS || newY >= ROWS ||
+        if (newX < 0 || newX >= COLUMNS || newY >= ROWS ||
             (newY >= 0 && field[newY][newX])) {
           isValid = false;
         }

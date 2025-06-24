@@ -12,9 +12,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "../../../brick_game/tetris/header/game_logic.h"
-#include "main.h"
-
+#include "../../../brick_game/tetris/hdr/game_logic.h"
+#include "../../../main/main.h"
+#define COLUMNS 10
 /**
  * @brief Отображает стартовый экран.
  */

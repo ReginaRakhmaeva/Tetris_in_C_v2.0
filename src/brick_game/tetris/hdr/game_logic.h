@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "../../common_base/brick_game.h"
+#include "fsm.h"
 #include "game_info.h"
 
 /**

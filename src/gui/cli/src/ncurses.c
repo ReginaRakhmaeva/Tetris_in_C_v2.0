@@ -21,6 +21,11 @@ void initNcurses() {
   curs_set(0);
 }
 
+void showGameOverScreen(GameInfo_t *game) {
+  displayGameOverScreen(game);
+  napms(1000);
+  cleanupNcurses(game);
+}
 /**
  * @brief Завершает работу с ncurses и очищает память, выделенную для поля и
  * фигур.
@@ -63,7 +68,3 @@ void cleanupNcursesstart() {
  * @param game Указатель на структуру GameInfo_t, содержащую информацию о
  * текущей игре.
  */
-void showGameOverScreen(GameInfo_t *game) {
-  displayGameOverScreen(game);
-  cleanupNcurses(game);
-}

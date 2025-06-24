@@ -7,6 +7,7 @@
 #define PIECE_MOVE_H
 
 #include "game_logic.h"
+#include "objects.h"
 
 /**
  * @brief Проверяет, может ли фигура двигаться вниз.

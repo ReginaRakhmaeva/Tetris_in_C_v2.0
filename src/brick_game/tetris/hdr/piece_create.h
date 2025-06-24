@@ -7,7 +7,7 @@
 #define PIECE_CREATE_H
 
 #include "game_logic.h"
-
+#include "objects.h"
 /**
  * @brief Создает новую фигуру и подготавливает следующую.
  *

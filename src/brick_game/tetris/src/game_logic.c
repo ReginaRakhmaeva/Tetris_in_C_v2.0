@@ -6,8 +6,60 @@
  * рекордов, обновление состояния игры, позиции фигуры, уровень и скорость, а
  * также очистку заполненных линий.
  */
+#include <stdlib.h>
+#include <time.h>
 
-#include "../header/game_logic.h"
+#include "../../common_base/brick_game.h"
+#include "../hdr/fsm.h"
+#include "../hdr/game_info.h"
+
+/**
+ * @brief Загружает рекордный счет из файла.
+ * @return Рекордный счет (0, если файл не найден).
+ */
+int loadHighScore();
+
+/**
+ * @brief Сохраняет рекордный счет в файл.
+ * @param highScore Рекордный счет для сохранения.
+ */
+void saveHighScore(int highScore);
+
+/**
+ * @brief Обновляет позицию текущей фигуры на поле.
+ * @param currentPiece Указатель на текущую фигуру.
+ * @param game Указатель на структуру GameInfo_t.
+ * @param lastTick Указатель на время последнего обновления.
+ * @return true, если фигура может двигаться дальше, иначе false.
+ */
+bool updatePiecePosition(Piece *currentPiece, GameInfo_t *game,
+                         clock_t *lastTick);
+
+/**
+ * @brief Инициализирует начальные параметры игры.
+ * @param game Указатель на структуру GameInfo_t.
+ */
+void initializeGame(GameInfo_t *game);
+
+/**
+ * @brief Обновляет очки после очистки линий.
+ * @param game Указатель на структуру GameInfo_t.
+ * @param linesCleared Количество очищенных линий.
+ */
+void updateScore(GameInfo_t *game, int linesCleared);
+
+/**
+ * @brief Обновляет уровень и скорость на основе очков.
+ * @param game Указатель на структуру GameInfo_t.
+ */
+void updateLevelAndSpeed(GameInfo_t *game);
+
+/**
+ * @brief Очищает заполненные линии на игровом поле.
+ * @param field Двумерный массив, представляющий игровое поле.
+ * @return Количество очищенных линий.
+ */
+int clearFullLines(int **field);
 
 /**
  * @brief Загружает рекордный счёт из файла.
@@ -51,7 +103,7 @@ void initializeGame(GameInfo_t *game) {
 
   game->field = (int **)malloc(sizeof(int *) * ROWS);
   for (int i = 0; i < ROWS; i++) {
-    game->field[i] = (int *)calloc(COLS, sizeof(int));
+    game->field[i] = (int *)calloc(COLUMNS, sizeof(int));
   }
 }
 
@@ -136,7 +188,7 @@ int clearFullLines(int **field) {
 
   for (int i = 0; i < ROWS; i++) {
     bool full = true;
-    for (int j = 0; j < COLS && full; j++) {
+    for (int j = 0; j < COLUMNS && full; j++) {
       if (!field[i][j]) {
         full = false;
       }
@@ -145,11 +197,11 @@ int clearFullLines(int **field) {
     if (full) {
       cleared++;
       for (int k = i; k > 0; k--) {
-        for (int j = 0; j < COLS; j++) {
+        for (int j = 0; j < COLUMNS; j++) {
           field[k][j] = field[k - 1][j];
         }
       }
-      for (int j = 0; j < COLS; j++) {
+      for (int j = 0; j < COLUMNS; j++) {
         field[0][j] = 0;
       }
     }
