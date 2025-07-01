@@ -38,13 +38,14 @@ int main(void) {
     if (!start) {
       renderStartScreen();
     } else if (isGameOver()) {
+      flushinp();
       renderGameOverScreen();
 
     } else if (!paused) {
+      flushinp();
       render_game(&info);
     }
-    int delay = 1000 / (info.speed > 0 ? info.speed : 1);
-    napms(delay);
+    napms(info.speed);
   }
 
   endwin();

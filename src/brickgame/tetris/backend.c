@@ -4,7 +4,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "../../../include/brickgame/tetris/fsm.h"  // Для установки GAME_OVER
+// #include "../../../include/brickgame/tetris/fsm.h"
 
 #define FIELD_WIDTH 10
 #define FIELD_HEIGHT 20
@@ -15,21 +15,13 @@ typedef struct {
   int x, y;
 } Tetromino;
 
-// Global constant: список всех фигур (в положении 0)
 static const int FIGURES[7][FIGURE_SIZE][FIGURE_SIZE] = {
-    // I
     {{0, 0, 0, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-    // O
     {{0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}},
-    // T
     {{0, 0, 0, 0}, {1, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}},
-    // S
     {{0, 0, 0, 0}, {0, 1, 1, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}},
-    // Z
     {{0, 0, 0, 0}, {1, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}},
-    // J
     {{0, 0, 0, 0}, {1, 1, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}},
-    // L
     {{0, 0, 0, 0}, {1, 1, 1, 0}, {1, 0, 0, 0}, {0, 0, 0, 0}}};
 
 static int field[FIELD_HEIGHT][FIELD_WIDTH];
@@ -70,17 +62,54 @@ static void clear_lines() {
         memcpy(field[ty], field[ty - 1], sizeof(field[0]));
       }
       memset(field[0], 0, sizeof(field[0]));
-      y++;  // Перепроверим текущую строку после сдвига
+      y++;
     }
   }
 
-  // Счёт и уровень — простая система
   if (lines_cleared > 0) {
-    info.score += 100 * lines_cleared;
-    if (info.score > info.high_score) info.high_score = info.score;
-    info.level = 1 + info.score / 500;
-    info.speed = info.level;  // Пропорционально
+    switch (lines_cleared) {
+      case 1:
+        info.score += 100;
+        break;
+      case 2:
+        info.score += 300;
+        break;
+      case 3:
+        info.score += 700;
+        break;
+      case 4:
+        info.score += 1500;
+        break;
+    }
+
+    if (info.score > info.high_score) {
+      info.high_score = info.score;
+      save_high_score(info.high_score);
+    }
+
+    int new_level = 1 + info.score / 600;
+    if (new_level > 10) new_level = 10;
+    if (new_level != info.level) {
+      info.level = new_level;
+    }
+    info.speed = get_level_speed(info.level);
   }
+}
+void save_high_score(int high_score) {
+  FILE *file = fopen("tetris_highscore.txt", "w");
+  if (file) {
+    fprintf(file, "%d", high_score);
+    fclose(file);
+  }
+}
+static int load_high_score() {
+  FILE *file = fopen(SCORE_FILE, "r");
+  int high_score = 0;
+  if (file) {
+    fscanf(file, "%d", &high_score);
+    fclose(file);
+  }
+  return high_score;
 }
 
 GameInfo_t backend_init_game(void) {
@@ -103,9 +132,9 @@ GameInfo_t backend_init_game(void) {
   }
 
   info.score = 0;
-  info.high_score = 0;
+  info.high_score = load_high_score();
   info.level = 1;
-  info.speed = 1;
+  info.speed = get_level_speed(info.level);
   info.pause = 0;
 
   return info;
@@ -138,36 +167,14 @@ static int check_spawn_failure() {
   return 0;
 }
 
-static void fix_piece() {
-  for (int y = 0; y < FIGURE_SIZE; ++y) {
-    for (int x = 0; x < FIGURE_SIZE; ++x) {
-      if (current_piece.shape[y][x]) {
-        int fx = current_piece.x + x;
-        int fy = current_piece.y + y;
-        if (fy >= 0 && fy < FIELD_HEIGHT && fx >= 0 && fx < FIELD_WIDTH) {
-          field[fy][fx] = 1;
-        }
-      }
-    }
-  }
-
-  clear_lines();
-
-  current_piece = next_piece;
-  spawn_piece(&next_piece);
-
-  // Проверка: можем ли поместить новую фигуру?
-  if (check_spawn_failure()) {
-    fsm_set_state(STATE_GAME_OVER);
-  }
-}
-
-void backend_update_physics(GameInfo_t *info_ptr) {
+BackendStatus backend_update_physics(GameInfo_t *info_ptr) {
   (void)info_ptr;
   if (!check_collision(0, 1)) {
     current_piece.y += 1;
+    info.score += 0;
+    return BACKEND_OK;
   } else {
-    fix_piece();
+    return backend_fix_piece();
   }
 }
 
@@ -175,7 +182,6 @@ static int try_rotate() {
   int rotated[FIGURE_SIZE][FIGURE_SIZE];
   rotate_clockwise(current_piece.shape, rotated);
 
-  // Пробуем без сдвига и со сдвигами влево/вправо
   const int offsets[] = {0, -1, 1, -2, 2};
   for (size_t i = 0; i < sizeof(offsets) / sizeof(offsets[0]); ++i) {
     int dx = offsets[i];
@@ -204,14 +210,14 @@ static int try_rotate() {
 
     if (!collision) {
       current_piece = temp;
-      return 1;  // Успешная ротация
+      return 1;
     }
   }
 
-  return 0;  // Ротация невозможна
+  return 0;
 }
 
-void backend_handle_input(UserAction_t action, bool hold) {
+BackendStatus backend_handle_input(UserAction_t action, bool hold) {
   switch (action) {
     case Left:
       if (!check_collision(-1, 0)) current_piece.x -= 1;
@@ -221,13 +227,11 @@ void backend_handle_input(UserAction_t action, bool hold) {
       break;
     case Down:
       if (hold) {
-        // Мгновенное падение до упора
         while (!check_collision(0, 1)) {
           current_piece.y += 1;
         }
-        fix_piece();  // После касания зафиксировать
+        return backend_fix_piece();
       } else {
-        // Стандартное пошаговое падение
         if (!check_collision(0, 1)) current_piece.y += 1;
       }
       break;
@@ -237,20 +241,18 @@ void backend_handle_input(UserAction_t action, bool hold) {
     default:
       break;
   }
+  return BACKEND_OK;
 }
-///////////////
-// Вернёт field с учётом текущей фигуры
+
 void backend_overlay_piece(GameInfo_t *info_ptr) {
   static int temp_field[FIELD_HEIGHT][FIELD_WIDTH];
 
-  // Скопировать поле
   for (int y = 0; y < FIELD_HEIGHT; ++y) {
     for (int x = 0; x < FIELD_WIDTH; ++x) {
       temp_field[y][x] = field[y][x];
     }
   }
 
-  // Наложить current_piece
   for (int y = 0; y < FIGURE_SIZE; ++y) {
     for (int x = 0; x < FIGURE_SIZE; ++x) {
       if (current_piece.shape[y][x]) {
@@ -266,4 +268,36 @@ void backend_overlay_piece(GameInfo_t *info_ptr) {
   for (int i = 0; i < FIELD_HEIGHT; ++i) {
     info_ptr->field[i] = temp_field[i];
   }
+}
+
+BackendStatus backend_fix_piece(void) {
+  for (int y = 0; y < FIGURE_SIZE; ++y) {
+    for (int x = 0; x < FIGURE_SIZE; ++x) {
+      if (current_piece.shape[y][x]) {
+        int fx = current_piece.x + x;
+        int fy = current_piece.y + y;
+        if (fy >= 0 && fy < FIELD_HEIGHT && fx >= 0 && fx < FIELD_WIDTH) {
+          field[fy][fx] = 1;
+        }
+      }
+    }
+  }
+
+  clear_lines();
+
+  current_piece = next_piece;
+  spawn_piece(&next_piece);
+
+  if (check_spawn_failure()) {
+    return BACKEND_GAME_OVER;
+  }
+  return BACKEND_OK;
+}
+
+GameInfo_t backend_get_info(void) { return info; }
+
+int get_level_speed(int level) {
+    int speed = 600 - (level - 1) * 60;
+    if (speed < 80) speed = 80;
+    return speed;
 }

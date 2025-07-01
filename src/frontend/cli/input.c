@@ -12,7 +12,6 @@ UserAction_t read_input(bool *hold) {
     case KEY_RIGHT:
       return Right;
     case KEY_DOWN:
-      *hold = true;
       return Down;
     case KEY_UP:
       return Up;  // Не используется

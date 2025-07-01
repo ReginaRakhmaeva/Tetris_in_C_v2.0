@@ -9,15 +9,11 @@
 
 static GameInfo_t game_info;
 
+
 static void reset_game_info(void) {
-  // Предположим, backend выделяет поле и next
-  if (game_info.field) {
-    free(game_info.field);  // Освобождаем старое поле, если нужно
-  }
-  if (game_info.next) {
-    free(game_info.next);
-  }
-  game_info = backend_init_game();  // Новый запуск через backend
+  if (game_info.field) { free(game_info.field); game_info.field = NULL; }
+  if (game_info.next) { free(game_info.next); game_info.next = NULL; }
+  game_info = backend_init_game();
 }
 
 void userInput(UserAction_t action, bool hold) {
@@ -25,8 +21,10 @@ void userInput(UserAction_t action, bool hold) {
   GameState_t state = fsm_get_state();
 
   if (state == STATE_RUNNING) {
-    // Только в режиме игры обрабатываем физику
-    backend_handle_input(action, hold);
+    BackendStatus status = backend_handle_input(action, hold);
+    if (status == BACKEND_GAME_OVER) {
+      fsm_set_state(STATE_GAME_OVER);
+    }
   }
 }
 
@@ -36,12 +34,17 @@ GameInfo_t updateCurrentState() {
     reset_game_info();
   }
   if (state == STATE_RUNNING) {
-    backend_update_physics(&game_info);
+    BackendStatus status = backend_update_physics(&game_info);
+    if (status == BACKEND_GAME_OVER) {
+      fsm_set_state(STATE_GAME_OVER);
+    }
   }
 
   backend_overlay_piece(&game_info);
 
   game_info.pause = (state == STATE_PAUSED);
+  game_info = backend_get_info();
+
   return game_info;
 }
 bool isGameOver(void) { return fsm_get_state() == STATE_GAME_OVER; }
