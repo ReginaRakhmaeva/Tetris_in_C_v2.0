@@ -293,6 +293,44 @@ BackendStatus backend_fix_piece(void) {
   }
   return BACKEND_OK;
 }
+// BackendStatus backend_fix_piece(void) {
+//   // Проверка: если хотя бы один блок фигуры выйдет выше поля — конец игры
+//   for (int y = 0; y < FIGURE_SIZE; ++y) {
+//     for (int x = 0; x < FIGURE_SIZE; ++x) {
+//       if (current_piece.shape[y][x]) {
+//         int fy = current_piece.y + y;
+//         if (fy < 0) {
+//           return BACKEND_GAME_OVER;
+//         }
+//       }
+//     }
+//   }
+
+//   // Фиксируем фигуру
+//   for (int y = 0; y < FIGURE_SIZE; ++y) {
+//     for (int x = 0; x < FIGURE_SIZE; ++x) {
+//       if (current_piece.shape[y][x]) {
+//         int fx = current_piece.x + x;
+//         int fy = current_piece.y + y;
+//         if (fy >= 0 && fy < FIELD_HEIGHT && fx >= 0 && fx < FIELD_WIDTH) {
+//           field[fy][fx] = 1;
+//         }
+//       }
+//     }
+//   }
+
+//   clear_lines();
+
+//   current_piece = next_piece;
+//   spawn_piece(&next_piece);
+
+//   if (check_spawn_failure()) {
+//     return BACKEND_GAME_OVER;
+//   }
+
+//   return BACKEND_OK;
+// }
+
 
 GameInfo_t backend_get_info(void) { return info; }
 
